@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
     class Customer {
         - String name
@@ -30,3 +31,4 @@ classDiagram
     Transaction "1" o-- "*" Item : contains >
     Item "1" --> "1" Category : belongs to >
     Category "1" -- "*" Item : groups >
+```
