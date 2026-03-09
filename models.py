@@ -47,6 +47,57 @@ class Item:
     def __repr__(self) -> str:
         return f"Item(name={self._name!r}, price={self._price}, category={self._category.name!r})"
 
+    @staticmethod
+    def sort_by_price(items: List[Item], ascending: bool = True) -> List[Item]:
+        """Sort items by price.
+        
+        Args:
+            items: List of Item objects to sort.
+            ascending: If True, sort lowest to highest; if False, highest to lowest.
+        
+        Returns:
+            New sorted list of items.
+        """
+        return sorted(items, key=lambda item: item.price, reverse=not ascending)
+
+    @staticmethod
+    def sort_by_popularity(items: List[Item], descending: bool = True) -> List[Item]:
+        """Sort items by popularity rating.
+        
+        Args:
+            items: List of Item objects to sort.
+            descending: If True, sort highest to lowest; if False, lowest to highest.
+        
+        Returns:
+            New sorted list of items.
+        """
+        return sorted(items, key=lambda item: item.popularity_rating, reverse=descending)
+
+    @staticmethod
+    def sort_by_name(items: List[Item]) -> List[Item]:
+        """Sort items alphabetically by name.
+        
+        Args:
+            items: List of Item objects to sort.
+        
+        Returns:
+            New sorted list of items in alphabetical order.
+        """
+        return sorted(items, key=lambda item: item.name)
+
+    @staticmethod
+    def filter_by_category(items: List[Item], category: "Category") -> List[Item]:
+        """Filter items by category.
+        
+        Args:
+            items: List of Item objects to filter.
+            category: The Category to filter by.
+        
+        Returns:
+            New list containing only items in the specified category.
+        """
+        return [item for item in items if item.category == category]
+
 
 class Category:
     """Group of related items (e.g. Drinks, Desserts)."""
@@ -73,8 +124,7 @@ class Category:
             item._category = self
 
     def filter(self) -> List[Item]:
-        """Return all items in this category.
-        (placeholder for more complex filtering later)"""
+        """Return all items in this category."""
         return self.items
 
     def __repr__(self) -> str:
@@ -102,6 +152,19 @@ class Transaction:
 
     def __repr__(self) -> str:
         return f"Transaction(total={self.total_cost():.2f}, items={len(self._items)})"
+
+    @staticmethod
+    def sort_by_total(transactions: List[Transaction], descending: bool = True) -> List[Transaction]:
+        """Sort transactions by total cost.
+        
+        Args:
+            transactions: List of Transaction objects to sort.
+            descending: If True, sort highest to lowest; if False, lowest to highest.
+        
+        Returns:
+            New sorted list of transactions.
+        """
+        return sorted(transactions, key=lambda t: t.total_cost(), reverse=descending)
 
 
 class Customer:
@@ -133,42 +196,62 @@ class Customer:
 
 # simple demonstration script; run this module directly to sanity-check behaviour
 if __name__ == "__main__":
-    # create categories
+    # Create categories
     drinks = Category("Drinks")
     desserts = Category("Desserts")
 
-    # items automatically add themselves to their category
+    # Add items (they auto-register with categories)
     cola = Item("Cola", 1.50, drinks, popularity_rating=4)
+    soda = Item("Soda", 1.25, drinks, popularity_rating=3)
     pie = Item("Apple Pie", 3.00, desserts, popularity_rating=5)
     burger = Item("Spicy Burger", 5.25, desserts, popularity_rating=3)
+    cake = Item("Chocolate Cake", 4.50, desserts, popularity_rating=4)
 
-    # category contents
-    print("Drinks category contains:", drinks.items)
-    print("Desserts category contains:", desserts.items)
+    # Collect all items for sorting/filtering demos
+    all_items = [cola, soda, pie, burger, cake]
 
-    # build a transaction
-    t1 = Transaction()
-    t1.add_item(cola)
-    t1.add_item(burger)
-    print("Transaction 1 items:", t1.items)
-    print("Transaction 1 total:", t1.total_cost())
+    print("=== All Items ===")
+    for item in all_items:
+        print(f"  {item}")
 
-    # second transaction
-    t2 = Transaction()
-    t2.add_item(pie)
-    print("Transaction 2 total:", t2.total_cost())
+    print("\n=== Sorting Items by Price (Ascending) ===")
+    sorted_price = Item.sort_by_price(all_items, ascending=True)
+    for item in sorted_price:
+        print(f"  {item}")
 
-    # customer with history
-    cust = Customer("Alice")
-    cust.add_transaction(t1)
-    cust.add_transaction(t2)
-    print("Customer record:", cust)
-    print("Purchase history:", cust.purchase_history)
-    print("Is customer valid?", cust.is_valid())
+    print("\n=== Sorting Items by Popularity (Descending) ===")
+    sorted_popular = Item.sort_by_popularity(all_items, descending=True)
+    for item in sorted_popular:
+        print(f"  {item}")
 
-    # expectations for manual check:
-    # - drinks category should list cola only
-    # - desserts category should contain pie and burger
-    # - t1 total should equal 6.75
-    # - t2 total should equal 3.0
-    # - customer.history length should be 2 and is_valid True
+    print("\n=== Sorting Items by Name ===")
+    sorted_name = Item.sort_by_name(all_items)
+    for item in sorted_name:
+        print(f"  {item}")
+
+    print("\n=== Filtering Items by Category (Desserts) ===")
+    desserts_items = Item.filter_by_category(all_items, desserts)
+    for item in desserts_items:
+        print(f"  {item}")
+
+    print("\n=== Category Filter (Drinks) ===")
+    drinks_items = drinks.filter()
+    for item in drinks_items:
+        print(f"  {item}")
+
+    # Build a transaction (customer order)
+    order = Transaction()
+    order.add_item(cola)
+    order.add_item(pie)
+    order.add_item(cake)
+
+    print("\n=== Customer Order ===")
+    for item in order.items:
+        print(f"  {item}")
+    print(f"Total Cost: ${order.total_cost():.2f}")
+
+    # Customer with transaction history
+    customer = Customer("Alice")
+    customer.add_transaction(order)
+    print(f"\nCustomer: {customer}")
+    print(f"Is Valid: {customer.is_valid()}")
